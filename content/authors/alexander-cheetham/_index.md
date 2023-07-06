@@ -31,3 +31,5 @@ last_name: Alexander
 first_name: Cheetham
 highlight_name: true
 ---
+As I have come to the conclusion of my undergraduate degree, I will be using this website to make posts about subjects that I am interested in and completing joint work with Cam. I am excited to learn about areas of pure maths such as category theory and topology to prepare me for a potential masters degree. 
+{style="text-align: justify;"}
