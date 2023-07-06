@@ -23,6 +23,9 @@ education:
     - course: BSc in Mathematics and Computer Science
       institution: University of Manchester
       year: 2023
+    - course: A levels
+      institution: Pate's Grammar School
+      year: 2020
 superuser: true
 last_name: Alexander
 first_name: Cheetham
