@@ -5,16 +5,26 @@ avatar_filename: avatar.png
 bio: My research interests include machine learning, computational fluid
   dynamics and artificial intelligence.
 interests:
-  - a
-  - c
-  - d
+  - Bregman Divergences
+  - Computational Neuroscience
+  - Entropic Optimal Transport
+  - Graph Neural Networks
 social:
   - display:
       header: false
     icon_pack: fab
     icon: linkedin
     link: https://www.linkedin.com/in/alexandercheetham/
+  - icon: cv
+    icon_pack: ai
+    link: uploads/alexandercheethamcv.pdf
+education:
+  courses:
+    - course: BSc in Mathematics and Computer Science
+      institution: University of Manchester
+      year: 2023
 superuser: true
-last_name: Wu
-first_name: Alice
+last_name: Alexander
+first_name: Cheetham
+highlight_name: true
 ---
