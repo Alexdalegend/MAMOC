@@ -1,12 +1,13 @@
 ---
 title: Alexander Cheetham
-# Full name (for SEO)
-first_name: Alice
-last_name: Wu
+role: Mathematics and Computer Science graduate from the University of Manchester
 avatar_filename: avatar.png
-bio: Mathematics and Computer Science undergraduate at the University of
-  Manchester; with an interest in machine learning, fluid dynamics and
-  artificial intelligence.
+bio: My research interests include machine learning, computational fluid
+  dynamics and artificial intelligence.
+interests:
+  - a
+  - c
+  - d
 social:
   - display:
       header: false
@@ -14,4 +15,6 @@ social:
     icon: linkedin
     link: https://www.linkedin.com/in/alexandercheetham/
 superuser: true
+last_name: Wu
+first_name: Alice
 ---
