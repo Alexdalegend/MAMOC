@@ -10,12 +10,12 @@ authors:
 ---
 
 ## Physics Informed Neural Networks (PINNs)
-PINNs are a machine learning model that can be used to solve forward/inverse problems involving partial differential equations(PDEs). In particular utilising regularisation through physics laws to reduce overfitting and improve performance on unseen or noisy data. Invented in 2017 by M. Raisse et al. {{< cite page="https://doi.org/10.1016/j.jcp.2018.10.045" view="citation" >}} in two papers on the forward/inverse problems respectively.
+PINNs are a machine learning model that can be used to solve forward/inverse problems involving partial differential equations(PDEs). In particular utilising regularisation through physics laws to reduce overfitting and improve performance on unseen or noisy data. Invented in 2017 by M. Raisse et al. in two papers on the forward/inverse problems respectively.
 
 ## Breaking down the definition
 
 ### Regularisation
-Regularisation is a technique to improve both training speed and model performance of a Neural Network (NN) by adding a penalty term to the loss function to enforce a characteristic on the model. For example overfitting is prevented by penalising large weights in the model or ensuring model predictions obey the laws of physics in the case of PINNs, explained in depth later. Simply, building on the misty hill gradient descent analogy {{< cite page="https://ayush-98282.medium.com/what-can-we-learn-from-gradient-descent-8ef0827902e1" view="citation" >}} regularisation acts as a path on the misty hill and we penalise any step in a direction that deviates from the path as that would be silly.
+Regularisation is a technique to improve both training speed and model performance of a Neural Network (NN) by adding a penalty term to the loss function to enforce a characteristic on the model. For example overfitting is prevented by penalising large weights in the model or ensuring model predictions obey the laws of physics in the case of PINNs, explained in depth later. Simply, building on the misty hill gradient descent analogy  regularisation acts as a path on the misty hill and we penalise any step in a direction that deviates from the path as that would be silly.
 {{< figure src="./PINNS/grad_desc.png" caption="Gradient Descent as steps on a misty hill" numbered="true" >}}
 
 
