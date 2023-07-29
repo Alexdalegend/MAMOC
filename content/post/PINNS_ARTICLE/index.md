@@ -23,7 +23,7 @@ Regularisation is a technique to improve both training speed and model performan
 
 {{< math >}}
 $$
-﻿\underset{f}{argmin} \sum\\_{i=1}^{N}V(f(x\_{i}),y_{i}) + \lambda R(f)
+﻿\underset{f}{argmin} \sum\_{i=1}^{N}V(f(x\_{i}),y_{i}) + \lambda R(f)
 $﻿$
 
 {{< /math >}}
