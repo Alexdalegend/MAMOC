@@ -13,7 +13,7 @@ image:
 ---
 ## Physics Informed Neural Networks (PINNs)
 
-PINNs are a machine learning model that can be used to solve forward/inverse problems involving partial differential equations(PDEs). In particular utilising regularisation through physics laws to reduce overfitting and improve performance on unseen or noisy data. Invented in 2017 by M. Raisse et al. in two papers[^1] on the forward/inverse problems respectively
+PINNs are a machine learning model that can be used to solve forward/inverse problems involving partial differential equations(PDEs). In particular utilising regularisation through physics laws to reduce overfitting and improve performance on unseen or noisy data. Invented in 2017 by M. Raisse et al. in two papers [^1] on the forward/inverse problems respectively
 
 ## Breaking down the definition
 
@@ -27,7 +27,7 @@ $$
 $$﻿{{< /math >}}
 
 
-For example overfitting is prevented by penalising large weights in the model or ensuring model predictions obey the laws of physics in the case of PINNs, explained in depth later. Simply, building on the misty hill gradient descent analogy[^2]  regularisation acts as a path on the misty hill and we penalise any step in a direction that deviates from the path as that would be silly.
+For example overfitting is prevented by penalising large weights in the model or ensuring model predictions obey the laws of physics in the case of PINNs, explained in depth later. Simply, building on the misty hill gradient descent analogy [^2]  regularisation acts as a path on the misty hill and we penalise any step in a direction that deviates from the path as that would be silly.
 {{< figure src="./PINNS/grad_desc.png" caption="Gradient Descent as steps on a misty hill" numbered="true" >}}
 
 ### Forward PDE problem
