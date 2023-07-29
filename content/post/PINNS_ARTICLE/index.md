@@ -19,11 +19,11 @@ PINNs are a machine learning model that can be used to solve forward/inverse pro
 
 ### Regularisation
 
-Regularisation is a technique to improve both training speed and model performance of a Neural Network (NN) by adding a penalty term to the loss function to enforce a characteristic on the model. In the usual manner we denote our model as $f$ and $V$as the loss function that measures the cost of a prediction $f(x\_*i)$ and a label $y$.  Then denote the regulariser function as $ R(f) $ . Finally we can define our objective function as:*
+Regularisation is a technique to improve both training speed and model performance of a Neural Network (NN) by adding a penalty term to the loss function to enforce a characteristic on the model. In the usual manner we denote our model as $f$ and $V$as the loss function that measures the cost of a prediction $f(x\\_*i)$ and a label $y$.  Then denote the regulariser function as $ R(f) $ . Finally we can define our objective function as:*
 
 {{< math >}}
 *$$
-﻿\underset{f}{argmin} \sum_*{i=1}^{N}V(f(x_i),y_i) + \lambda R(f)
+﻿\underset{f}{argmin} \sum\\_*{i=1}^{N}V(f(x\\_i),y\\_i) + \lambda R(f)
 $﻿$
 
 {{< /math >}}
