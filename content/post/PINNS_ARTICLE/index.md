@@ -7,6 +7,7 @@ image:
   caption: 'Image credit: [**Lexica Aperture v2**](https://lexica.art/prompt/79d0a820-627a-48c7-88eb-05ae0a63eba2)'
 authors:
 - alexander-cheetham
+summary: An investigation into Physics Informed Neural Networks and their ability to solve forward/inverse problems with PDEs.
 ---
 
 ## Physics Informed Neural Networks (PINNs)
