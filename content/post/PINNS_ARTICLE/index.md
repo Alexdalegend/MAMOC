@@ -22,11 +22,11 @@ PINNs are a machine learning model that can be used to solve forward/inverse pro
 Regularisation is a technique to improve both training speed and model performance of a Neural Network (NN) by adding a penalty term to the loss function to enforce a characteristic on the model. In the usual manner we denote our model as $f$ and $V$ as the loss function that measures the cost of a prediction {{< math >}}  $f(x_{i})$ {{< /math >}}  and a label $y$. Then denote the regulariser function as $ R(f) $ . Finally we can define our objective function as:
 
 {{< math >}}
-$$
+$
 ﻿\underset{f}{argmin} \sum\_{i=1}^{N} V(f(x\_{i}),y_{i}) + \lambda R(f)
-$﻿$
+$﻿{{< /math >}}
 
-{{< /math >}}
+
 For example overfitting is prevented by penalising large weights in the model or ensuring model predictions obey the laws of physics in the case of PINNs, explained in depth later. Simply, building on the misty hill gradient descent analogy[^2]  regularisation acts as a path on the misty hill and we penalise any step in a direction that deviates from the path as that would be silly.
 {{< figure src="./PINNS/grad_desc.png" caption="Gradient Descent as steps on a misty hill" numbered="true" >}}
 
