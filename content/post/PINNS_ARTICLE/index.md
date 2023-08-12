@@ -14,34 +14,39 @@ image:
 ---
 ## Physics Informed Neural Networks (PINNs)
 
-Physics-informed neural networks (PINNs) are a deep learning framework for solving partial differential equations (PDEs). PINNs work by adding the PDE to the loss function of a neural network and using automatic differentiation to train the network. This allows PINNs to solve PDEs that are difficult or impossible to solve with traditional numerical methods, such as finite element methods (FEM).
+Physics-informed neural networks (PINNs) are a deep learning framework for solving partial differential equations (PDEs). PINNs work by adding a specified PDE to the loss function of a neural network and utilising automatic differentiation to train the network. This allows PINNs to solve PDEs that are difficult or impossible to solve with traditional numerical methods, such as finite element methods (FEM). Invented in 2017 by M. Raisse et al. in two papers [^PINNPAPER] for the forward/inverse problems, which are defined as follows:
+- Foward Problem: The underlying equation and the boundary conditions are known, and the goal is to find the solution to the equation.
+- Inverse Problem:  The underlying equation and the boundary conditions are known, but the values of some of the parameters in the equation are unknown. The goal is to find the values of these parameters and the solution, given experimental data.
 
- PINNs are particularly well-suited for solving problems where the local consistency of FEM is broken. This can happen in situations where the PDE is sensitive to initial conditions, such as in chaotic differential equations or in integro-differential equations. In these situations, PINNs can often achieve much higher accuracy than FEM. Invented in 2017 by M. Raisse et al. in two papers [^PINNPAPER] for the forward/inverse problems, which are defined as follows:
-- Foward Problem: the underlying equation and the boundary conditions are known, and the goal is to find the solution to the equation.
-- Inverse Problem:  The underlying equation and the boundary conditions are known, but the values of some of the parameters in the equation are unknown. The goal is to find the values of these parameters, given experimental data.
+In both forward and inverse problems, PINNs are trained on a dataset of known solutions to the underlying equation. This dataset can be generated using numerical methods, such as the finite element method, finite difference method or from physical experiments. PINNs are particularly well-suited for solving problems where:
+ - The local consistency of FEM is broken like in integro-differential equations,
+ - High-dimensional input domain settings, in which classical techniques (such as FEM) are prohibitively expensive[^COD],
+ - Parameter inference is occuring simultaneously (inverse problems).
 
-In both forward and inverse problems, PINNs are trained on a dataset of known solutions to the underlying equation. This dataset can be generated using numerical methods, such as the finite element method, finite difference method or from physical experiments. This article explores PINNS by generating a solution for the Sprott attractor (forward problem) and the solution to an inverse problem involving the Navier-Stokes equations.
+ Furthermore, they can be trained to generate solutions for multiple physical parameter values, by adding them as outputs from the model, e.g., multiple kinematic viscosity values in the Navier-Stokes equations. The PINN can also be probed for any continuous point in time/space unlike FEMs. In these restricted use cases, PINNs  achieve performance on par or better than FEMs[^podcast].  **However** PINNs are currently perform poorly at solving stiff equations, where stiffness is the difficulty to solve numerically,  as 'Neural Networks are biased in their frequency domain to drop off lower frequency terms which is what causes the issues with stiffness'[^podcast] and in the vast majority of cases PDEs do not satisfy the conditions for which FEMs are considerably faster or more accurate. This means that in industry the most popular use case of PINNs is an out the box model that has been trained with standard boundary conditions, which allows the customer to get useful solutions out.  
+ 
+ This article explores PINNs by generating a solution for the Sprott attractor (forward problem) and the solution to an inverse problem involving the Navier-Stokes equations. These problems are chosen to benefit a PINN as the Sprott attractor exhbits sensitivity to initial conditions which make it hard for the FEM to match. Furthermore inverse problems, as mentioned before, are faster for PINNs as they can learn the parameters while training unlike FEMs.
 
 ## Deep Neural Networks
-In PINNS, the neural network(NN) is placed in the position of the solution to the PDE.The PDE is defined on the domain $\Omega \in \mathbb{R}^d$ with a solution $u(\mathbf{x})$ approximated by the neural network $f$ parameterised by $\lambda$. Where the input vector as $\mathbf{x}=(x\_{1},...,x\_{d})^T$.
+In PINNS, the neural network (NN) is approximating the solution to the PDE. The PDE is defined on the domain $\Omega \in \mathbb{R}^d$ with a solution $u(\mathbf{x})$ approximated by the neural network $f$ parameterised by $\lambda$. The input vector is $\mathbf{x}=(x\_{1},...,x\_{d})^T$.
 {{< math >}}
 $$
-f(\mathbf{x};\frac{\delta u}{\delta x\\_{1}},...,\frac{\delta u}{\delta x\\_{d}};\frac{\delta^2 u}{\delta x\\_1^2},...,\frac{\delta^2 u}{\delta x\\_1\delta x\\_d},...;\lambda).
+f \left( \mathbf{x};\frac{\partial u}{\partial x\\_{1}},...,\frac{\partial u}{\partial x\\_{d}};\frac{\partial^2 u}{\partial x\\_1^2},...,\frac{\partial^2 u}{\partial x\\_1\partial x\\_d},...;\lambda \right).
 
 $${{< /math >}}
 
 Alongside suitable boundary conditions $\mathcal{B}(u,\mathbf{x})=0 \text{ on } \delta \Omega$. Although many NN architectures exist, the multi-layer perceptron is suitable for solving most PDEs and as such for the remainder of the article the architecture will be assumed to be a fully connected feed-forward network.
 ## Adapted Loss Function
-It was stated in the first paragraph that PINNs operate by $\textcolor{red}{\text{incorporating the PDE into the loss function}}$. So in the usual manner the model, loss and training dataset  are denoted as $f$, $V$ and $\mathcal{T}$ respectively. Then $\mathbf{\theta}$ is defined as the weights and biases in the NN and $\mathcal{T}=\mathcal{T}\_f + \mathcal{T}\_b$ are two training sets where $\mathcal{T}\_f \in \Omega$ are the points in the domain and $\mathcal{T}\_b \in \Omega$ are the problem boundary conditions. Then the loss function can be setup as
+It was stated in the first paragraph that PINNs operate by $\textcolor{red}{\text{incorporating the PDE into the loss function}}$. So, in the usual manner, the model, loss and training dataset  are denoted as $f$, $V$ and $\mathcal{T}$ respectively. Then $\mathbf{\theta}$ is defined as the weights and biases in the NN and $\mathcal{T}=\mathcal{T}\_f + \mathcal{T}\_b$ are two training sets where $\mathcal{T}\_f \in \Omega$ are the points in the domain and $\mathcal{T}\_b \in \Omega$ are the problem boundary conditions. Then the loss function can be setup as
 {{< math >}}
 $$
 \ell(\mathcal{T},f(x;\mathbf{\theta}),R) =   \omega\\_f \textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_f)} + \omega\\_b  V(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_b)
 $$
 {{< /math >}}
-where for PINNs
+where, for PINNs,
 {{< math >}}
 $$
-\textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_f)}=\frac{1}{|\mathcal{T}\\_f|} \underset{x \in \mathcal{T}_f}{\sum} \lVert f(\mathbf{x};\frac{\delta u}{\delta x\\_{1}},...,\frac{\delta u}{\delta x\\_{d}};\frac{\delta^2 u}{\delta x\\_1^2},...,\frac{\delta^2 u}{\delta x\\_1\delta x\\_d},...;\lambda) \rVert\\_2^2
+\textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_f)}=\frac{1}{|\mathcal{T}\\_f|} \underset{x \in \mathcal{T}_f}{\sum} \left\lVert f(\mathbf{x};\frac{\delta u}{\delta x\\_{1}},...,\frac{\delta u}{\delta x\\_{d}};\frac{\delta^2 u}{\delta x\\_1^2},...,\frac{\delta^2 u}{\delta x\\_1\delta x\\_d},...;\lambda) \right\rVert\\_2^2
 $$
 {{< /math >}}
 {{< math >}}
@@ -49,10 +54,10 @@ $$
 V(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_b)=\frac{1}{|\mathcal{T}\\_b|} \underset{x\\_i \in \mathcal{T}_b}{\sum} \lVert f(x\\_i;\mathbf{\theta}) - \mathcal{B}(x\\_i) \rVert\\_2^2
 $$
 {{< /math >}}
-So there are two terms for the loss the loss induced on the boundary conditions and the loss on the domain that are simultaneously backpropogated to train the model. Observed or experimental data can be added into the boundary condition loss set as $(x\_i,\mathcal{B}(x\_i))$ pairs. Building upon the classic misty hill analogy for gradient descent[^mistyhill], the $\textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\_f)}$ (the loss induced by the governing PDE) provides a set of steps down the hill that act as a good heuristic to improve the chances of getting to the bottom (global minima and solution to the PDE). For example if the aim is to approximate a solution to the diffusion equation $\frac{\delta^2 f}{\delta x^2}= \frac{1}{\kappa} \frac{\delta f}{\delta t}$ then the corresponding PDE loss would be $\underset{f}{argmin}\\,\frac{\delta^2 f}{\delta x^2}- \frac{1}{\kappa} \frac{\delta f}{\delta t}$ as the second expression is the corresponding minimisation task that corresponds to the NN obeying the PDE.
+There are two terms for the loss, induced on the boundary conditions and on the domain, that are simultaneously backpropogated to train the model. Observed or experimental data can be added into the boundary condition loss set as $(x\_i,\mathcal{B}(x\_i))$ pairs. Building upon the classic misty hill analogy for gradient descent[^mistyhill], the $\textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\_f)}$ (the loss induced by the governing PDE) provides a set of steps down the hill that act as a good heuristic to improve the chances of getting to the bottom (global minima and solution to the PDE). For example if the aim is to approximate a solution to the diffusion equation $\frac{\delta^2 f}{\delta x^2}= \frac{1}{\kappa} \frac{\delta f}{\delta t}$ then the corresponding PDE loss would be $\underset{f}{\text{argmin}}\\,\left( \frac{\delta^2 f}{\delta x^2}- \frac{1}{\kappa} \frac{\delta f}{\delta t}\right)$ as the second expression is the minimisation task that corresponds to the NN obeying the PDE.
 {{< figure src="./PINNS/grad_desc.png" caption="Gradient descent as steps on a misty hill" numbered="true" >}}
 ## Automatic Differentiation
-During the backpropogation process the traditional aim is to minimise the derivatives $\frac{\delta \ell(f)}{\delta x\_1},...,\frac{\delta \ell(f) }{\delta x\_d}$ i.e the loss of the model with respect to the inputs. In the process of computing these derivatives we also end up computing the loss with respect to each model parameter and can then utilise a weight update algorithm such as ADAM[^adam], L-BFGS[^L-BFGS] or the traditional $w\_{t+1}=w\_t + \eta \frac{\delta \ell(f)}{\delta w}$. In PINNS **we now have the conditions of the PDE to enforce on the NN as well through the addition of the PDE error to the loss function**. Furthermore, the advantage is notable over FEM as NNs only require one pass of the data through the approximating function however FEM require the computation of both $\forall i \\, f(x\_1,...x\_i,...,x\_d)$ and $f(x\_1,...x\_i+ \Delta x\_i,...,x\_d) $. Meaning for large $dim(\mathbf{x})$ automatic differentiation is much more efficient.
+During the backpropogation process the traditional aim is to minimise the derivatives $\frac{\delta \ell(f)}{\delta x\_1},...,\frac{\delta \ell(f) }{\delta x\_d}$ ,i.e., the loss of the model with respect to the inputs. In the process of computing these derivatives we also end up computing the loss with respect to each model parameter and can then utilise a weight update algorithm such as ADAM[^adam], L-BFGS[^L-BFGS] or the traditional $w\_{t+1}=w\_t + \eta \frac{\delta \ell(f)}{\delta w}$. In PINNS **we now have the boundary conditions of the PDE to enforce on the NN through the addition of the PDE error to the loss function**. Furthermore, NNs only require one pass of the data through the approximating function however FEM require the computation of both $ \\, f(x\_1,...x\_i,...,x\_d)$ and $f(x\_1,...x\_i+ \Delta x\_i,...,x\_d) $ for all $i$. For large $\text{dim}(\mathbf{x})$, automatic differentiation is much more efficient.
 
 
 ## The PINN
@@ -60,23 +65,24 @@ We now formalise the PINN algorithm and NN structure, copying from Lu Lu and DEE
 1. Construct a Neural Network with accompanying parameters,
 2. Create the two training datasets $\mathcal{T}\_f,\mathcal{T}\_b$,
 3. Specify the loss function and weights associated to $\omega\_f, \omega\_b$,
-4. Train the Neural Network to find find the best paramets that minimise the loss function.
+4. Train the Neural Network to find find the best parameters that minimise the loss function.
 
 {{< figure src="./PINNS/PINN_schematic.png" caption="Schematic of a PINN for solving the diffusion equation credit to Lu Lu et al. and DEEPXDE" numbered="true" >}}
 
-## Forward Problem: Sprott Atractor
-The Sprott Attractor[^sprott] is a chaotic dynamical system proposed in a 2014 paper that exhibits sensitivity to initial conditions and exhibits complex structure. It will be treated as a forward problem and therefore know in advance the parameters $\alpha, \beta$ and select $t \in [0,20]$ as the domain to learn on.
+## Forward Problem: Sprott Attractor
+The Sprott Attractor[^sprott] is a chaotic dynamical system proposed in a 2014 paper that exhibits sensitivity to initial conditions and exhibits complex structure. It will be treated as a forward problem and therefore that we know in advance the parameters $\alpha, \beta$ and select $t \in [0,20]$ as the domain to learn on.
 {{< math >}}
 $$
  f(t)=\begin{cases} 
       \frac{dx}{dt} = y +\alpha xy + xz \\
-      \frac{dy}{dt} = 1 - \beta x^2 + y*z  \\
+      \frac{dy}{dt} = 1 - \beta x^2 + yz  \\
       \frac{dz}{dt} = x - x^2 - y^2
    \end{cases},\quad \alpha=2.07, \beta = 1.79
 
 $$
 {{< /math >}}
 ### Data/PDE Setup
+The code in this section defines the geometric domain(time domain $(0,20)$), solver settings, and ODE system. The ODE system is a three-dimensional system of ordinary differential equations (ODEs) where $\texttt{x, y and z}$ are the three state variables of the system and $\texttt{o}$ is now the output of the model.
 ```python
 import deepxde as dde
 import numpy as np
@@ -87,22 +93,27 @@ a = 2.07
 b = 1.79
 
 
-def ode_system(t, Y):
-    # https://www.dynamicmath.xyz/strange-attractors/ sprot attractor
+def ode_system(t, o):
+    # https://www.dynamicmath.xyz/strange-attractors/ Sprott attractor
 
-    X = Y[:, 0:1]
-    y = Y[:, 1:2]
-    z = Y[:, 2:3]
-    dX_t = dde.grad.jacobian(Y, t, i=0)
-    dy_t = dde.grad.jacobian(Y, t, i=1)
-    dz_t = dde.grad.jacobian(Y, t, i=2)
+    x = o[:, 0:1]
+    y = o[:, 1:2]
+    z = o[:, 2:3]
+    dx_t = dde.grad.jacobian(o, t, i=0)
+    dy_t = dde.grad.jacobian(o, t, i=1)
+    dz_t = dde.grad.jacobian(o, t, i=2)
     return [
-        dX_t - (y + (X * a * y) + (X * z)),
-        dy_t - 1 + b * X * X - y * z,
-        dz_t - X + X * X + y * y,
+        dx_t - (y + (x * a * y) + (x * z)),
+        dy_t - 1 + b * x * x - y * z,
+        dz_t - X + x * x + y * y,
     ]
 ```
 ### Neural Network Setup
+The code in this section sets up the neural network for solving the ODE system. The network architecture is 4 hidden layers, each with 20 neurons. The activation function for all layers is $tanh$ (notable for PINNS due its non-zero derivatives mitigating the "dying ReLU" problem[^dyingrelu]). The weights of the neural network are initialized using the Glorot normal initializer.
+
+The code also defines a function called input_transform. This function takes a time $\texttt{t}$ as input and returns a vector of sinusoidal features that will be used as input to the neural network. As we know in advance that the solution contains sinusoidal like behaviour this feature layer will boost learning performance. The code then calls the $\texttt{apply_feature_transform}$ method on the neural network. 
+
+The code in this section is used to set up the neural network for solving the ODE system.
 ```python
 n = 10
 x_true, y_true, z_true = gen_truedata(n)
@@ -125,7 +136,7 @@ def input_transform(t):
             tf.sin(2 * t),
             tf.sin(3 * t),
             tf.sin(4 * t),
-            tf.cos(5 * t),
+            tf.sin(5 * t),
             tf.sin(6 * t),
         ),
         axis=1,
@@ -135,35 +146,47 @@ def input_transform(t):
 net.apply_feature_transform(input_transform)
 ```
 ### Train
+The code in this section trains the neural network to solve the ODE system. The training process uses the Adam optimizer with a learning rate of 1e-3. The training is run for 200 iterations, and the loss history is monitored every iteration. The model is saved to a file after training is complete for later inference.
 ```python
 model = dde.Model(data, net)
 model.compile("adam", lr=1e-3,)
-losshistory, train_state =model.train(iterations=200,display_every=1,disregard_previous_best=False, ) 
+losshistory, train_state =model.train(iterations=200,
+                                    display_every=1,
+                                    disregard_previous_best=False, ) 
 model.save(save_path="./strange_attract-10t/model")
 ```
 ### Results
-
+The results show that the Sprott Attractor model can be accurately solved using a neural network with only 50 pieces of data. The model converges after 80 epochs, and the final plot of the three-dimensional attractor matches the true solution with a testing error of approximately 1e-4. This is a significant result, as it shows that PINNS can be used to solve complex ODE systems with relatively little data. The attractor is a three-dimensional object that has a complex and unpredictable structure. The neural network is able to reproduce this structure accurately.
 {{< figure style='width:20%' src="./PINNS/training.gif" caption="Training animation for Sprott Attractor" numbered="true" >}}
 {{< figure style='width:20%' src="./PINNS/solution.gif" caption="Solution Plot" numbered="true" >}}
 
 
 
 ## Inverse Problem: Inlet/Outlet Cavity
-The problem considered is one created by John Burkardt for the paper 'Centroidal voronoi tesselation-based reduced-order modelling of complex systems'[^inlet] as the problem considered in the paper has an accompanying dataset[^dataset] of $(u,v)$ pairs for the domain that can be used for $\mathcal{T}_b$.
-The spatial domain is defined as $\Omega = (0,1)\times(0,1)$ and time domain $(0,T)$ and use the 2d Navier-Stokes Equations with the following boundary conditions:
+For the inverse problem, we consider a cavity filled with liquid that has an inlet port in the bottom left and outlet port in the top right, we aim to model the flow of liquid in this cavity.
+
+The problem considered is one created by John Burkardt in 'Centroidal voronoi tesselation-based reduced-order modelling of complex systems'[^inlet] as the problem considered has an accompanying dataset[^dataset] of $(u,v)$ pairs for the domain that can be used for $\mathcal{T}_b$.
+The spatial domain is defined as $\Omega = (0,1)\times(0,1)$, time domain $(0,T)$ and use the 2d Navier-Stokes Equations with the following boundary conditions:
 $$
  \begin{align}
  \frac{\delta \mathbf{u}}{\delta t} - \nu \Delta \mathbf{u} + \mathbf{u} \cdot \nabla \mathbf{u} + \nabla p = 0 \quad \text{in} \quad (0,T)\times\Omega \\\
   \nabla \cdot \mathbf{u} = 0 \quad \text{in} \quad (0,T)\times\Omega \\\
   \mathbf{u}(0,x)=\mathbf{u}\_0(x) \quad \text{in} \quad \Omega \\\
   \\\
-  \mathbf{u}=5*(1-(y-0.1)^2/0.01) \quad \text{on} \quad  (0,T)\times\Gamma\_i \\\
+  \mathbf{u}=5(1-(y-0.1)^2/0.01) \quad \text{on} \quad  (0,T)\times\Gamma\_i \\\
   (\mathbf{n}\cdot\nabla)\mathbf{u}=0 \quad \text{on} \quad (0,T)\times\Gamma\_o \\\
   \mathbf{u}=0\quad \text{on} \quad (0,T)\times\Gamma\_d
  \end{align}
 $$
 {{< figure style='width:20%' src="./PINNS/cavity.jpg" caption="Spatial Domain $\Omega$" numbered="true" >}}
 ### Data/PDE Setup
+The code in this section defines the Navier-Stokes equations that will be solved. The equations are defined in terms of the velocity field $(u,v)$, the pressure $p$, and the streamfunction $\psi$.We make the assumption that $u = \psi\_y \text{ and } v = −\psi\_ x$ for some latent function $\psi(t, x, y)$. Under this assumption, the continuity equation $u\_x +v\_y=0$ will be automatically satisfied.
+
+ The free parameters $[C\_1,C\_2]$ to be learned, that make the problem inverse, are also defined. The code then defines the spatial and temporal domains for the problem. The spatial domain is a rectangle with dimensions $(0,0) \text{ to } (1,1)$. The temporal domain is the interval [0,6]. The geometry is a combination of the spatial and temporal domains. In the code below we manufacture adherance to the continuity equation $\nabla \cdot \mathbf{u}=0$ by using the stream function[^stream] $\psi(x,y)$ which only needs continuous first and second partial derivatives (implying the order of differentiation does not matter) and obeys $u(x,y)=\frac{\delta \psi}{\delta y}\\, \text{ and }\\,v(x,y)=-\frac{\delta \psi}{\delta x}$. Then, the continuity condition holds as follows:
+ $$
+ \nabla (u,v) \equiv \frac{\delta u}{\delta x} + \frac{\delta v}{\delta y} = \frac{\delta \psi}{\delta y \delta x} - \frac{\delta \psi}{\delta x \delta y} = 0.
+ $$
+ So the model has four outputs $(\psi,p,u,v)$ where $u,v$ are linked to $\psi$ with the PDE equations ` u_diff = u_real - u` and `v_diff = v_real - v`. This allows the point set boundary condition to be applied in the next section.
 ```python
 import deepxde as dde
 import numpy as np
@@ -175,10 +198,10 @@ C2 = dde.Variable(1 / 300)
 def Navier_Stokes_Equation(x, y):
     """
         System of PDEs to be minimized: incompressible Navier-Stokes equation in the
-        continuum-mechanics based forC2lations.
+        continuum-mechanics based setup.
 
         """
-    psi, p, u_real, v_real = y[:, 0:1], y[:, 1:2], y[:, 2:3], y[:, 3:4],
+    psi, p, u_real, v_real = y[:, 0:1], y[:, 1:2], y[:, 2:3], y[:, 3:4]
 
     p_x = dde.grad.jacobian(p, x, i=0,j=0)
     p_y = dde.grad.jacobian(p, x, i=0,j=1)
@@ -198,6 +221,7 @@ def Navier_Stokes_Equation(x, y):
     du_yy = dde.grad.hessian(u, x, i=1, j=1)
     dv_xx = dde.grad.hessian(v, x, i=0, j=0)
     dv_yy = dde.grad.hessian(v, x, i=1, j=1)
+
     continuity = u_x + v_y
     x_momentum = u_t + C1 * (u * u_x + v * u_y) + p_x - C2 * (du_xx + du_yy)
     y_momentum = v_t + C1 * (u * v_x + v * v_y) + p_y - C2 * (dv_xx + dv_yy)
@@ -210,6 +234,9 @@ time_domain = dde.geometry.TimeDomain(0, 6)
 geomtime = dde.geometry.GeometryXTime(space_domain, time_domain)
 ```
 ### Neural Network Setup
+The code in this section sets up the neural network for solving the Navier-Stokes equations. The neural architecture has 6 hidden layers, each with 50 neurons. As before, the activation function for all layers is $tanh$ and the weights of the neural network are initialized using the Glorot uniform initializer.
+
+The code also creates a dataset of training data. The dataset is created by sampling the Navier-Stokes equations on a fine grid. The dataset includes 700 domain points, 200 boundary points, 100 initial points for $\mathcal{T}_f$ and 7000 for $\mathcal{T}_b$, and 3000 test points.
 ```python
 [ob_x, ob_y, ob_t, ob_u, ob_v] = create_dataset('data_full.csv',5000)
 ob_xyt = np.hstack((ob_x, ob_y, ob_t))
@@ -234,23 +261,45 @@ net = dde.nn.FNN(layer_size, activation, initializer)
 model = dde.Model(data, net)
 ```
 ### Train
+The code in this section trains the neural network to solve the ODE system. The training process uses the Adam optimizer with a learning rate of 1e-3. The training is run for 10000 iterations and the loss history is monitored every 10 iterations. The model is saved to a file after training is complete for later inference. 
+{{% callout note %}}
+This model required hours of time to train with a GPU accelerated tensorflow backend, so we highly recommend doing the same if you try to replicate the experiment.
+{{% /callout %}}
 ```python
 model.compile("adam", lr=1e-3, external_trainable_variables=[C1, C2])
 loss_history, train_state = model.train(
-    iterations=10000, callbacks=[variable], display_every=10, disregard_previous_best=False,)
+    iterations=10000, callbacks=[variable], display_every=10,
+                     disregard_previous_best=False,)
 model.save(save_path="./psi_pinn_nt/model")
 ```
 ### Results
+The results show that the PINN is able to accurately predict the flow of fluid in the domain. The predicted flow matches the true flow over the domain the NN was trained on, with non-degenerative performance on out of domain data. The testing error was on the order of 1e-3 across the six objective functions, which is a good indication that the neural network is accurately predicting the flow. 
 {{< figure style='width:20%' src="./PINNS/ns.gif" caption="Solution Plot" numbered="true" >}}
+
+## Conclusion
+I learned a lot about PINNs in the process of writing this article, specifically, testing my patience after spending one week debugging the PINN to discover that my visualization function was malformed. I learned about the basic structure of a PINN, how they are trained, and how they can be used to solve PDEs. I also learned about the advantages of PINNs over traditional numerical methods, such as FEM. I am excited to learn more about PINNs and their potential applications in the future.
+
+Here are some specific things I learned:
+
+- PINNs are a relatively new research area, but they have already shown great promise for solving PDEs.
+- PINNs can be used to solve PDEs that are difficult or impossible to solve with traditional numerical methods.
+- PINNs can be trained on relatively little data, how little data was required to train the Sprott attractor was very impressive.
+- PINNs can often be more efficient than traditional numerical methods for high dimensional problems.
+
+Thank you to Cam, Nathan, Rick and Ed for their support and putting up with my whining at spending one week debugging a single line of code and to Ben and James for their exhaustive grammar checking.
 
 
 [^PINNPAPER]:M. Raissi, P. Perdikaris, G.E. Karniadakis,
 [Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations](https://doi.org/10.1016/j.jcp.2018.10.045)
-
+[^COD]:[Christian Beck et al, Overcoming the curse of dimensionality in the numerical approximation of Allen–Cahn partial differential equations via truncated full-history recursive multilevel Picard approximations](https://arxiv.org/pdf/1907.06729.pdf)
+[^podcast]:[Physics-Informed Neural Networks (PINNs) - Chris
+Rackauckas | Podcast #42](https://open.spotify.com/episode/3fYcufW1xQsNh5qkOW6EMW?si=VwtK2hPxTDaTSLP5KoSlKg&context=spotify%3Ashow%3A4Y9L0uykSmk7sgskLjBQ1k)
 [^mistyhill]:[What can we learn from gradient descent?](https://ayush-98282.medium.com/what-can-we-learn-from-gradient-descent-8ef0827902e1)
 [^adam]:[Kingma, D. P., & Ba, J. L. (2015). Adam: A method for stochastic optimization.](https://arxiv.org/abs/1412.6980)
 [^L-BFGS]:[Liu, D. C., & Nocedal, J. (1989). On the limited memory BFGS method for large scale optimization.](https://link.springer.com/article/10.1007/bf01589116)
 [^deepxde]:[LU LU, XUHUI MENG, ZHIPING MAO, AND GEORGE EM KARNIADAKIS, DEEPXDE: A DEEP LEARNING LIBRARY FOR SOLVING DIFFERENTIAL EQUATIONS](https://arxiv.org/pdf/1907.04502.pdf)
 [^sprott]:[J.C. Sprott, A dynamical system with a strange attractor and invariant tori](https://sprott.physics.wisc.edu/pubs/paper423.pdf)
+[^dyingrelu]:[Kenneth Leung,The Dying ReLU Problem, Clearly Explained](https://towardsdatascience.com/the-dying-relu-problem-clearly-explained-42d0c54e0d24)
 [^inlet]:[JOHN BURKARDT, MAX GUNZBURGER, AND HYUNG-CHUN LEE, CENTROIDAL VORONOI TESSELLATION-BASEDREDUCED-ORDER MODELING OF COMPLEX SYSTEMS](https://people.sc.fsu.edu/~jburkardt/publications/MR2231716.pdf)
 [^dataset]:[INOUT_FLOW2 INOUT Flow Problem Solution Datasets](https://people.sc.fsu.edu/~jburkardt/datasets/inout_flow2/inout_flow2.html)
+[^stream]:[JOHN BURKARDT, The Stream Function, MATH1091: ODE methods for a reaction diffusion equation](https://people.sc.fsu.edu/~jburkardt/classes/math1091_2020/stream/stream.pdf)
