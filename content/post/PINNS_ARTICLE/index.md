@@ -46,7 +46,7 @@ $$
 where, for PINNs,
 {{< math >}}
 $$
-\textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_f)}=\frac{1}{|\mathcal{T}\\_f|} \underset{x \in \mathcal{T}_f}{\sum} \left\lVert f(\mathbf{x};\frac{\delta u}{\delta x\\_{1}},...,\frac{\delta u}{\delta x\\_{d}};\frac{\delta^2 u}{\delta x\\_1^2},...,\frac{\delta^2 u}{\delta x\\_1\delta x\\_d},...;\lambda) \right\rVert\\_2^2
+\textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_f)}=\frac{1}{|\mathcal{T}\\_f|} \underset{x \in \mathcal{T}_f}{\sum} \left\lVert f(\mathbf{x};\frac{\partial u}{\partial x\\_{1}},...,\frac{\partial u}{\partial x\\_{d}};\frac{\partial^2 u}{\partial x\\_1^2},...,\frac{\partial^2 u}{\partial x\\_1\partial x\\_d},...;\lambda) \right\rVert\\_2^2
 $$
 {{< /math >}}
 {{< math >}}
@@ -54,10 +54,10 @@ $$
 V(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_b)=\frac{1}{|\mathcal{T}\\_b|} \underset{x\\_i \in \mathcal{T}_b}{\sum} \lVert f(x\\_i;\mathbf{\theta}) - \mathcal{B}(x\\_i) \rVert\\_2^2
 $$
 {{< /math >}}
-There are two terms for the loss, induced on the boundary conditions and on the domain, that are simultaneously backpropogated to train the model. Observed or experimental data can be added into the boundary condition loss set as $(x\_i,\mathcal{B}(x\_i))$ pairs. Building upon the classic misty hill analogy for gradient descent[^mistyhill], the $\textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\_f)}$ (the loss induced by the governing PDE) provides a set of steps down the hill that act as a good heuristic to improve the chances of getting to the bottom (global minima and solution to the PDE). For example if the aim is to approximate a solution to the diffusion equation $\frac{\delta^2 f}{\delta x^2}= \frac{1}{\kappa} \frac{\delta f}{\delta t}$ then the corresponding PDE loss would be $\underset{f}{\text{argmin}}\\,\left( \frac{\delta^2 f}{\delta x^2}- \frac{1}{\kappa} \frac{\delta f}{\delta t}\right)$ as the second expression is the minimisation task that corresponds to the NN obeying the PDE.
+There are two terms for the loss, induced on the boundary conditions and on the domain, that are simultaneously backpropogated to train the model. Observed or experimental data can be added into the boundary condition loss set as $(x\_i,\mathcal{B}(x\_i))$ pairs. Building upon the classic misty hill analogy for gradient descent[^mistyhill], the $\textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\_f)}$ (the loss induced by the governing PDE) provides a set of steps down the hill that act as a good heuristic to improve the chances of getting to the bottom (global minima and solution to the PDE). For example if the aim is to approximate a solution to the diffusion equation $\frac{\partial^2 f}{\partial x^2}= \frac{1}{\kappa} \frac{\partial f}{\partial t}$ then the corresponding PDE loss would be $\underset{f}{\text{argmin}}\\,\left( \frac{\partial^2 f}{\partial x^2}- \frac{1}{\kappa} \frac{\partial f}{\partial t}\right)$ as the second expression is the minimisation task that corresponds to the NN obeying the PDE.
 {{< figure src="./PINNS/grad_desc.png" caption="Gradient descent as steps on a misty hill" numbered="true" >}}
 ## Automatic Differentiation
-During the backpropogation process the traditional aim is to minimise the derivatives $\frac{\delta \ell(f)}{\delta x\_1},...,\frac{\delta \ell(f) }{\delta x\_d}$ ,i.e., the loss of the model with respect to the inputs. In the process of computing these derivatives we also end up computing the loss with respect to each model parameter and can then utilise a weight update algorithm such as ADAM[^adam], L-BFGS[^L-BFGS] or the traditional $w\_{t+1}=w\_t + \eta \frac{\delta \ell(f)}{\delta w}$. In PINNS **we now have the boundary conditions of the PDE to enforce on the NN through the addition of the PDE error to the loss function**. Furthermore, NNs only require one pass of the data through the approximating function however FEM require the computation of both $ \\, f(x\_1,...x\_i,...,x\_d)$ and $f(x\_1,...x\_i+ \Delta x\_i,...,x\_d) $ for all $i$. For large $\text{dim}(\mathbf{x})$, automatic differentiation is much more efficient.
+During the backpropogation process the traditional aim is to minimise the derivatives $\frac{\partial \ell(f)}{\partial x\_1},...,\frac{\partial \ell(f) }{\partial x\_d}$ ,i.e., the loss of the model with respect to the inputs. In the process of computing these derivatives we also end up computing the loss with respect to each model parameter and can then utilise a weight update algorithm such as ADAM[^adam], L-BFGS[^L-BFGS] or the traditional $w\_{t+1}=w\_t + \eta \frac{\partial \ell(f)}{\partial w}$. In PINNS **we now have the boundary conditions of the PDE to enforce on the NN through the addition of the PDE error to the loss function**. Furthermore, NNs only require one pass of the data through the approximating function however FEM require the computation of both $ \\, f(x\_1,...x\_i,...,x\_d)$ and $f(x\_1,...x\_i+ \Delta x\_i,...,x\_d) $ for all $i$. For large $\text{dim}(\mathbf{x})$, automatic differentiation is much more efficient.
 
 
 ## The PINN
@@ -169,7 +169,7 @@ The problem considered is one created by John Burkardt in 'Centroidal voronoi te
 The spatial domain is defined as $\Omega = (0,1)\times(0,1)$, time domain $(0,T)$ and use the 2d Navier-Stokes Equations with the following boundary conditions:
 $$
  \begin{align}
- \frac{\delta \mathbf{u}}{\delta t} - \nu \Delta \mathbf{u} + \mathbf{u} \cdot \nabla \mathbf{u} + \nabla p = 0 \quad \text{in} \quad (0,T)\times\Omega \\\
+ \frac{\partial \mathbf{u}}{\partial t} - \nu \Delta \mathbf{u} + \mathbf{u} \cdot \nabla \mathbf{u} + \nabla p = 0 \quad \text{in} \quad (0,T)\times\Omega \\\
   \nabla \cdot \mathbf{u} = 0 \quad \text{in} \quad (0,T)\times\Omega \\\
   \mathbf{u}(0,x)=\mathbf{u}\_0(x) \quad \text{in} \quad \Omega \\\
   \\\
@@ -182,9 +182,9 @@ $$
 ### Data/PDE Setup
 The code in this section defines the Navier-Stokes equations that will be solved. The equations are defined in terms of the velocity field $(u,v)$, the pressure $p$, and the streamfunction $\psi$.We make the assumption that $u = \psi\_y \text{ and } v = −\psi\_ x$ for some latent function $\psi(t, x, y)$. Under this assumption, the continuity equation $u\_x +v\_y=0$ will be automatically satisfied.
 
- The free parameters $[C\_1,C\_2]$ to be learned, that make the problem inverse, are also defined. The code then defines the spatial and temporal domains for the problem. The spatial domain is a rectangle with dimensions $(0,0) \text{ to } (1,1)$. The temporal domain is the interval [0,6]. The geometry is a combination of the spatial and temporal domains. In the code below we manufacture adherance to the continuity equation $\nabla \cdot \mathbf{u}=0$ by using the stream function[^stream] $\psi(x,y)$ which only needs continuous first and second partial derivatives (implying the order of differentiation does not matter) and obeys $u(x,y)=\frac{\delta \psi}{\delta y}\\, \text{ and }\\,v(x,y)=-\frac{\delta \psi}{\delta x}$. Then, the continuity condition holds as follows:
+ The free parameters $[C\_1,C\_2]$ to be learned, that make the problem inverse, are also defined. The code then defines the spatial and temporal domains for the problem. The spatial domain is a rectangle with dimensions $(0,0) \text{ to } (1,1)$. The temporal domain is the interval [0,6]. The geometry is a combination of the spatial and temporal domains. In the code below we manufacture adherance to the continuity equation $\nabla \cdot \mathbf{u}=0$ by using the stream function[^stream] $\psi(x,y)$ which only needs continuous first and second partial derivatives (implying the order of differentiation does not matter) and obeys $u(x,y)=\frac{\partial \psi}{\partial y}\\, \text{ and }\\,v(x,y)=-\frac{\partial \psi}{\partial x}$. Then, the continuity condition holds as follows:
  $$
- \nabla (u,v) \equiv \frac{\delta u}{\delta x} + \frac{\delta v}{\delta y} = \frac{\delta \psi}{\delta y \delta x} - \frac{\delta \psi}{\delta x \delta y} = 0.
+ \nabla (u,v) \equiv \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = \frac{\partial \psi}{\partial y \partial x} - \frac{\partial \psi}{\partial x \partial y} = 0.
  $$
  So the model has four outputs $(\psi,p,u,v)$ where $u,v$ are linked to $\psi$ with the PDE equations ` u_diff = u_real - u` and `v_diff = v_real - v`. This allows the point set boundary condition to be applied in the next section.
 ```python
