@@ -28,7 +28,7 @@ In both forward and inverse problems, PINNs are trained on a dataset of known so
  This article explores PINNs by generating a solution for the Sprott attractor (forward problem) and the solution to an inverse problem involving the Navier-Stokes equations. These problems are chosen to benefit a PINN as the Sprott attractor exhbits sensitivity to initial conditions which make it hard for the FEM to match. Furthermore inverse problems, as mentioned before, are faster for PINNs as they can learn the parameters while training unlike FEMs.
 
 ## Deep Neural Networks
-In PINNS, the neural network (NN) is approximating the solution to the PDE. The PDE is defined on the domain $\Omega \in \mathbb{R}^d$ with a solution $u(\mathbf{x})$ approximated by the neural network $f$ parameterised by $\lambda$. The input vector is $\mathbf{x}=(x\_{1},...,x\_{d})^T$.
+In PINNS, the neural network (NN) is approximating the solution to the PDE. The PDE is defined on the domain $\Omega \subset \mathbb{R}^d$ with a solution $u(\mathbf{x})$ approximated by the neural network $f$ parameterised by $\lambda$. The input vector is $\mathbf{x}=(x\_{1},...,x\_{d})^T$.
 {{< math >}}
 $$
 f \left( \mathbf{x};\frac{\partial u}{\partial x\\_{1}},...,\frac{\partial u}{\partial x\\_{d}};\frac{\partial^2 u}{\partial x\\_1^2},...,\frac{\partial^2 u}{\partial x\\_1\partial x\\_d},...;\lambda \right).
@@ -37,7 +37,7 @@ $${{< /math >}}
 
 Alongside suitable boundary conditions $\mathcal{B}(u,\mathbf{x})=0 \text{ on } \delta \Omega$. Although many NN architectures exist, the multi-layer perceptron is suitable for solving most PDEs and as such for the remainder of the article the architecture will be assumed to be a fully connected feed-forward network.
 ## Adapted Loss Function
-It was stated in the first paragraph that PINNs operate by $\textcolor{red}{\text{incorporating the PDE into the loss function}}$. So, in the usual manner, the model, loss and training dataset  are denoted as $f$, $V$ and $\mathcal{T}$ respectively. Then $\mathbf{\theta}$ is defined as the weights and biases in the NN and $\mathcal{T}=\mathcal{T}\_f + \mathcal{T}\_b$ are two training sets where $\mathcal{T}\_f \in \Omega$ are the points in the domain and $\mathcal{T}\_b \in \Omega$ are the problem boundary conditions. Then the loss function can be setup as
+It was stated in the first paragraph that PINNs operate by $\textcolor{red}{\text{incorporating the PDE into the loss function}}$. So, in the usual manner, the model, loss and training dataset  are denoted as $f$, $V$ and $\mathcal{T}$ respectively. Then $\mathbf{\theta}$ is defined as the weights and biases in the NN and $\mathcal{T}=\mathcal{T}\_f \cup \mathcal{T}\_b$ are two training sets where $\mathcal{T}\_f \subset \Omega$ are the points in the domain and $\mathcal{T}\_b \subset \Omega$ are the problem boundary conditions. Then the loss function can be setup as
 {{< math >}}
 $$
 \ell(\mathcal{T},f(x;\mathbf{\theta}),R) =   \omega\\_f \textcolor{red}{R(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_f)} + \omega\\_b  V(f(\mathbf{x};\mathbf{\theta}),\mathcal{T}\\_b)
