@@ -1,7 +1,7 @@
 ---
 title: Cameron Michie
 role: BSc Physics with Theoretical Physics graduate from the University of Manchester
-avatar_filename: linkedin_profilepic.jpeg
+avatar_filename: avatar.png
 bio: I am excited to research many things and write up my thoughts on here. How delightful.
 social:
   - display:
@@ -11,7 +11,7 @@ social:
     link: https://www.linkedin.com/in/cameron-michie/
   - icon: cv
     icon_pack: ai
-    link: uploads/resume.pdf
+    link: uploads/Cameron Michie CV 09 08 23.pdf
 education:
   courses:
     - course: BSc in Physics with Theoretical Physics
