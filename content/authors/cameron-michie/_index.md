@@ -11,7 +11,7 @@ social:
     link: https://www.linkedin.com/in/cameron-michie/
   - icon: cv
     icon_pack: ai
-    link: uploads/resume.pdf
+    link: uploads/cameronmichie_cv.pdf
 education:
   courses:
     - course: BSc in Physics with Theoretical Physics
