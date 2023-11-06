@@ -2,7 +2,8 @@
 title: Cameron Michie
 role: BSc Physics with Theoretical Physics graduate from the University of Manchester
 avatar_filename: avatar.png
-bio: I am excited to research many things and write up my thoughts on here. How delightful.
+bio: Interested in mathematical modelling, then generating and visualising data.
+role: Developer Success Manager @ Ably
 social:
   - display:
       header: false
