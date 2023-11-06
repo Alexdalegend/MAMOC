@@ -1,3 +1,13 @@
+---
+title: The Spatial Ecology of Predator Prey Systems.
+date: 2023-11-06
+math: true
+summary: How best to model foxes and rabbits? Reaction-diffusion systems vs agent based models.
+authors:
+  - cameron-michie
+commentable: false
+---
+
 # The Spatial Ecology of Predator Prey Systems #
 This article focuses on methods of computationally modelling systems of many interacting particles. One is a class of methods called reaction-diffusion systems, which are mathematical constructs that describe how spatial and temporal patterns emerge from the interactions between organisms and their environment. Also considered are agent based models, which instead only use hyper-local information and do not rely on macroscopic differential equations at all. In particular, the predator prey system is considered from both perspectives. By coupling local interaction rules with movement, these models elucidate the dynamics of population spread, predator-prey relationships, and the emergence of patterns in ecosystems.
 
