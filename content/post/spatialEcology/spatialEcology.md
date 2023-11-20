@@ -8,7 +8,7 @@ authors:
 commentable: false
 image:
   placement: 2
-  caption: "./spatialEcology/mamoc2a4.png"
+  caption: "MAMOC2 - Cam Michie"
 ---
 
 {{<figure src="./spatialEcology/mamoc2a4.png" >}}
@@ -34,11 +34,11 @@ In chemistry, the Belousov-Zhabotinsky chemical reaction is an incredible displa
 <br>
 These systems are linked, and the outcomes we see from their patterns are directly caused by similarities in the form of the differential equations which govern their spatio-temporal evolution. They share the two species reaction diffusion equations, which are given by
 
-$$
+{{< math >}}$$
 \begin{pmatrix} \dot q_{1} \\\ \dot q_{2} \end{pmatrix} =
 \begin{pmatrix} D_{1} \\\ D_{2}  \end{pmatrix} \cdot
 \nabla^{2} \begin{pmatrix}q_{1} \\\ q_{2}  \end{pmatrix} + 
-\begin{pmatrix} R_{1}(q_{1}, q_{2}) \\\  R_{2}(q_{1}, q_{2}) \end{pmatrix},$$
+\begin{pmatrix} R_{1}(q_{1}, q_{2}) \\\  R_{2}(q_{1}, q_{2}) \end{pmatrix},$${{< math >}}
 
 where $q_{1,2}$ describes the concentration of either species, $D_{1,2}$ their diffusion coefficients, and $R_{1,2}(q_{1}, q_{2})$ are functions representing the agent's interactive and local behaviour. Decomposing the equation, the first term on the right hand side can be recognised as Fick’s second law of diffusion, $ \dot q = D \nabla^{2} q$ for a concentration $q$ [[2]].  
 
@@ -50,10 +50,10 @@ The dynamics of our model is specified by the rates at which individuals move an
 
 This example, the Lotka-Volterra equations, are a model for the population dynamics of a predator species and a prey species, perhaps foxes and rabbits, and is a convinient way to explore how reaction terms work. Choosing to completely ignore spatial dimensions, the mean field assumption can be adopted: that all agents interact with the average effect of all others. Letting $ x_1(t) $ denote the prey population and $x_2(t) $ denote the predator population at time $t $,
 
-$$ 
+{{< math >}}$$ 
 \dot x_1 = \alpha x_1 - \beta x_1 x_2,$$
 $$\dot x_2 = \delta x_1 x_2 - \gamma x_2.
-$$
+$${{< math >}}
 - $ \alpha $ is the natural birth rate of the prey in the absence of predators.
 
 - $ \beta $ is the death rate of the prey due to predation.
@@ -64,10 +64,10 @@ $$
 
 Reading off from the general form of reaction-diffusion equations, $D_1$ and $D_2$ have been set to zero, and the remaining terms are the reactive terms $R_{1,2}(q_{1}, q_{2})$. Below, linear stability analysis is used with the method outlined by Strogatz [[3] pp.151-152]. Firstly, the steady states of this system of differential equations are found by setting the time derivatives to zero. The trivial solution $x_1 = x_2 = 0$ indicates mutual extinction, but otherwise, solving for constants, we get ${x_1, x_2} = {\gamma / \delta, \alpha / \beta}$. Secondarily, to analyse the stability of these steady state solutions, our set of differential equations are linearised so that we have
 
-$$J = \begin{pmatrix} \frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} \\\
+{{< math >}}$$J = \begin{pmatrix} \frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} \\\
  \frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} \end{pmatrix} = \begin{pmatrix} \alpha - \beta x_2 & -\beta x_1 \\\
  \delta x_2 & \delta x_1 - \gamma \end{pmatrix}  = \begin{pmatrix} 0 & -\beta \frac{\gamma}{\delta} \\\
-  \delta \frac{\alpha}{\beta} & 0 \end{pmatrix}.$$
+  \delta \frac{\alpha}{\beta} & 0 \end{pmatrix}.$${{< math >}}
 
 The trivial solution has eigenvalues $\alpha$ and $-\gamma$, indicating a saddle point [[3], p.130]. This is good, because saddle points are unstable, meaning the model does not predict spiralling uncontrollably towards extinction. The other matrix has eigenvalues $+i \sqrt{\alpha \gamma}$ and $- i \sqrt{\alpha \gamma}$, which indicates periodic trigonometric-esque solutions.
 
@@ -75,10 +75,10 @@ The trivial solution has eigenvalues $\alpha$ and $-\gamma$, indicating a saddle
 
 The model elegantly captures the core ideas: prey populations grow naturally but are eaten by predators, and predator populations decline without food but grow when they eat prey. That said, the model is limited, as it never predicts extinction for nonzero initial populations. A better model would include a notion of self competition in the individual populations, perhaps stemming from a fixed supply of food. Such a model would be self-limiting. A better model, 
 
-$$ 
-\dot x_1 = \alpha x_1 (1 - x_1 / \eta_{1}) - \beta x_1 x_2,$$
-$$\dot x_2 = \gamma x_2 (1 - x_2 / \eta_{2}) - \delta x_1 x_2
-$$
+{{< math >}}$$ 
+\dot x_1 = \alpha x_1 (1 - x_1 / \eta_{1}) - \beta x_1 x_2,$${{< math >}}
+{{< math >}}$$\dot x_2 = \gamma x_2 (1 - x_2 / \eta_{2}) - \delta x_1 x_2
+$${{< math >}}
 
 introduces the notion of independent growth limitation on the individual populations $x_1$ and $x_2$ to
 the system through the Logistic model. The advantages is this allows one species to “win”, in addition to cases where both populations settle on fixed values. But there are limitations. The periodic/cyclic nature of the original Lotka-Volterra model is lost.
@@ -89,10 +89,10 @@ the system through the Logistic model. The advantages is this allows one species
 The main ingredient missing from these models is the absence of spatial dependence in the model. Further, there is reason to be concerned with the mean field assumption that we adopted before, which states that all agents interact with the average effect of all the others agents. In reality, agents exist in 2D space and can only interact with their immediate spatial neighbours, and the model should reflect this. 
 
 One option is to add in our our Fick’s law inspired diffusion terms, and so we define the spatial Lotka-Volterra equations
-
-$$\frac{\partial x_1}{\partial t} = \alpha x_1 - \beta x_1 x_2 + D_1 \nabla^2 x_1,$$
-
-$$\frac{\partial x_2}{\partial t} = \delta x_1 x_2 - \gamma x_2 + D_2 \nabla^2 x_2.$$
+{{< math >}}
+$$\frac{\partial x_1}{\partial t} = \alpha x_1 - \beta x_1 x_2 + D_1 \nabla^2 x_1,$${{< math >}}
+{{< math >}}
+$$\frac{\partial x_2}{\partial t} = \delta x_1 x_2 - \gamma x_2 + D_2 \nabla^2 x_2.$${{< math >}}
 
 This set of differential equations can be modelled computationally on a randomised initial population to show the progression of the reaction-diffusion system. We can use an Euler-esque method for executing this progression, by multiplying our differential equations by a timestep $dt$ to get a $dX$, and adding that to $X$ each iterative timestep $t$. 
 
@@ -253,41 +253,41 @@ The agent based model was the most enjoyable, the most challenging, and took the
 **Derivation of how Turing patterns form and why they disperse in the spatial Lotka Volterra equations**
 
 Patterns seem to form in the spatial Lotka reaction-diffusion simulation for predators and prey in a 2D grid. These patterns seem similar to Turing patterns commonly seen in nature. The equations I have called the spatial Lotka-Volterra equations were formed by adding in diffusive Laplacian terms to the classic Lotka-Volterra equations.
-
-$$\frac{\partial x_1}{\partial t} = \alpha x_1 - \beta x_1 x_2 + D_1 \nabla^2 x_1 $$
-
-$$\frac{\partial x_2}{\partial t} = \delta x_1 x_2 - \gamma x_2 + D_2 \nabla^2 x_2 $$
+{{< math >}}
+$$\frac{\partial x_1}{\partial t} = \alpha x_1 - \beta x_1 x_2 + D_1 \nabla^2 x_1 $${{< math >}}
+{{< math >}}
+$$\frac{\partial x_2}{\partial t} = \delta x_1 x_2 - \gamma x_2 + D_2 \nabla^2 x_2 $${{< math >}}
 
 To prove that the given system of equations produces Turing patterns [[4]], we need to perform a linear stability analysis around a homogeneous steady state solution, and look for conditions under which perturbations grow in a spatially inhomogeneous way. We will follow the method here [[5]]. First, let's find the homogeneous steady state $(x_1^{\*}, x_2^{\*})$ for a spatially uniform state by setting 
-
-$$ \frac{\partial x_1}{\partial t} = \frac{\partial x_2}{\partial t} = 0, \nabla^2 x_1 = \nabla^2 x_2 = 0.$$
+{{< math >}}
+$$ \frac{\partial x_1}{\partial t} = \frac{\partial x_2}{\partial t} = 0, \nabla^2 x_1 = \nabla^2 x_2 = 0.$${{< math >}}
 
 Subbing this into the above spatial Lotka Volterras, we get
-$$
-0 = \alpha x_1^\* - \beta x_1^\* x_2^\*,$$
-$$0 = \delta x_1^\* x_2^\* - \gamma x_2^\*.
-$$
+{{< math >}}$$
+0 = \alpha x_1^\* - \beta x_1^\* x_2^\*,$${{< math >}}
+{{< math >}}$$0 = \delta x_1^\* x_2^\* - \gamma x_2^\*.
+$${{< math >}}
 
 Solving for $ x_1^{\*} $ and $ x_2^{\*} $,
 $ x_2^{\*} = \frac{\alpha}{\beta}$ and 
 $ x_1^\* = \frac{\gamma}{\delta x_2^{\*}} = \frac{\gamma \beta}{\alpha \delta}$
 
 Next, we linearize the system around the steady state by letting $ x_1 = x_1^\* + u $ and $ x_2 = x_2^\* + v $, where $ u $ and $ v $ are small perturbations. We then substitute these into our system and keep only linear terms in $ u $ and $ v $. After linearization, the system becomes:
-$$
-\partial_t u = \alpha u - \beta (x_1^\* v + x_2^\* u) + D_1 \nabla^2 u$$
-$$
+{{< math >}}$$
+\partial_t u = \alpha u - \beta (x_1^\* v + x_2^\* u) + D_1 \nabla^2 u$${{< math >}}
+{{< math >}}$$
 \partial_t v = \delta (x_1^\* v + x_2^\* u) - \gamma v + D_2 \nabla^2 v
-$$
+$${{< math >}}
 
 Substituting the steady-state values and simplifying we get
-$$
-\partial_t u = (\alpha - \beta x_2^\*) u - \beta x_1^\* v + D_1 \nabla^2 uu = - \frac{\beta \gamma}{\delta} v + D_1 \nabla^2 u $$
-$$\partial_t v = \delta x_2^* u + (\delta x_1^* - \gamma) v + D_2 \nabla^2 v = \delta x_2^* u + (\delta x_1^* - \gamma) v + D_2 \nabla^2 .$$
+{{< math >}}$$
+\partial_t u = (\alpha - \beta x_2^\*) u - \beta x_1^\* v + D_1 \nabla^2 uu = - \frac{\beta \gamma}{\delta} v + D_1 \nabla^2 u $${{< math >}}
+{{< math >}}$$\partial_t v = \delta x_2^* u + (\delta x_1^* - \gamma) v + D_2 \nabla^2 v = \delta x_2^* u + (\delta x_1^* - \gamma) v + D_2 \nabla^2 .$${{< math >}}
 
 
 So, we have our fully linearized system which we can write in matrix form as:
 
-$$
+{{< math >}}$$
 \begin{pmatrix} \partial_t u, \\\
 \partial_t v \end{pmatrix} =\begin{pmatrix} D_1 \nabla^2 & -\frac{\beta \gamma}{\delta} \\\
 \frac{\alpha \delta}{\beta} & D_2 \nabla^2 - \gamma
@@ -296,30 +296,30 @@ $$
 u \\\
 v
 \end{pmatrix}
-$$
+$${{< math >}}
 
 Now we look for solutions in the form of $ e^{\lambda t + ik\cdot r} $, where $ \lambda $ is the growth rate of the perturbation, $ k $ is the wave number, and $ r $ is the position vector.
 
 We substitute this form into the linearized system and solve for $ \lambda $. The dispersion relation is obtained by setting the determinant of the matrix minus $ \lambda I $ to zero:
 
-$$
+{{< math >}}$$
 \det
 \begin{pmatrix}
 D_1 k^2 - \lambda & -\frac{\beta \gamma}{\delta} \\\
 \frac{\alpha \delta}{\beta} & D_2 k^2 - \gamma - \lambda
 \end{pmatrix}
 = 0
-$$
+$${{< math >}}
 
 Solving the characteristic equation, we get:
-$$
+{{< math >}}$$
 (D_1 k^2 - \lambda)(D_2 k^2 - \gamma - \lambda) - \left(-\frac{\beta \gamma}{\delta}\right)\left(\frac{\alpha \delta}{\beta}\right) = 0
-$$
+$${{< math >}}
 
 Expanding and simplifying gives us a quadratic equation in $\lambda $,
-$$
+{{< math >}}$$
 \lambda^2 + \lambda(D_1 k^2 + D_2 k^2 - \gamma) + h(k^2) = 0.
-$$
+$${{< math >}}
 where $ h(k^2) = D_1 D_2 k^4 - \gamma D_1 k^2 - \alpha \gamma$.
 
 For Turing instability, we need [[6]]:
@@ -332,11 +332,11 @@ Instead, we will reason that if we have $h(k^2) < 0$ for some $k^2$, it must be 
 
 Next, performing a quick change of variables $z = k^2$, 
 
-$$\frac{dh(z=k^2)}{dz}=2 D_1 D_2 z - \gamma D_1,$$
+{{< math >}}$$\frac{dh(z=k^2)}{dz}=2 D_1 D_2 z - \gamma D_1,$${{< math >}}
 
 we aim to find the stationary point so set $\frac{h(z^{\*})}{dz}$ to zero, and prove its minimum is negative. We get $z^{\*}=\frac{\gamma}{2 D_2}$, and plugging this into $h(z)$ gives a value for $h_{min}$ (since $h(z)$ is clearly concave),
 
-$$h_{min}(z^{\*}=\frac{\gamma}{2 D_2}) = \frac{D_1 D_2 \gamma^2}{4 D_2} - \frac{D_1 \gamma^2}{2 D_2} - \alpha \gamma = - \frac{D_1 \gamma^2}{D_2} - \alpha \gamma$$
+{{< math >}}$$h_{min}(z^{\*}=\frac{\gamma}{2 D_2}) = \frac{D_1 D_2 \gamma^2}{4 D_2} - \frac{D_1 \gamma^2}{2 D_2} - \alpha \gamma = - \frac{D_1 \gamma^2}{D_2} - \alpha \gamma$${{< math >}}
 
 Since $ \alpha, \gamma, D_1, D_2 $ are necessarily $>0$, we have proved that for $h(k^2)$ is necessarily negative for some range of $k^2$, and that $\lambda $ is positive for that same range of $k^2$. Why this leads to Turing instabilities is explained in more detail here [[6]].
 
