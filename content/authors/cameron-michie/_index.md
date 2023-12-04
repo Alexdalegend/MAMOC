@@ -2,7 +2,7 @@
 title: Cameron Michie
 role: BSc Physics with Theoretical Physics graduate from the University of Manchester
 avatar_filename: avatar.png
-bio: I am excited to research many things and write up my thoughts on here. How delightful.
+bio: For me, this blog is a space to write long pieces on topics that interest me. The idea is that I will use maths make a model, then computationally generate some data using that model, and then use the data to create some interesting visuals.
 social:
   - display:
       header: false
