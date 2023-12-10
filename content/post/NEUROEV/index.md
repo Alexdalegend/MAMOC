@@ -13,11 +13,11 @@ image:
 ---
 ## NeuroEvolution of Augmenting Topologies
 
-NeuroEvolution of Augmenting Topologies (NEAT) is an evolutionary algorithm for generating intelligent behaviour in one layer neural networks. NEAT works by evaluating neural networks against a performance metric and reproducing those networks that perform best. NEAT does not require the backpropogation algorithm or labelled examples to learn, therefore allowing it to be used in much broader settings than deep learning methods. Invented in 2002 by Stanley and Miikkulainen[^NEATPAPER] the state of the art adaptations to NEAT have applications in game design[^NERO], reinforcement learning and control problems[^RL]. This article will explore experiments regarding bipedal walking and the NEAT algorithm including its Novelty Search adaptation.
+NeuroEvolution of Augmenting Topologies (NEAT) is an evolutionary algorithm for generating intelligent behaviour in one layer neural networks. NEAT works by evaluating neural networks against a fitness function (performance metric) and breeding those networks that perform best. NEAT does not require the backpropogation algorithm or labelled examples to learn, therefore allowing it to be used in much broader settings than deep learning methods. Invented in 2002 by Stanley and Miikkulainen[^NEATPAPER] the state of the art adaptations to NEAT have applications in game design[^NERO], reinforcement learning and control problems[^RL]. This article will explore experiments regarding bipedal walking and the NEAT algorithm including its Novelty Search adaptation.
 
 [Skip to the experiments](#learning-to-walk)
 ## The Algorithm
-As NEAT is an evolutionary algorithm which obeys the following high level process for optimisation
+As NEAT is an evolutionary algorithm which obeys the high level process for optimisation shown in the diagram below.
 {{< figure src="./NEUROEV/EV_PROC.jpg" caption="High Level Evolutionary Process source Baeldung" numbered="true" >}}
 A more detailed description of each step in the evolution process:
 1. Initialisation: The first step is to generate a pool of candidate solutions. This can be done by randomly generating neural networks or by loading a set of pre-existing networks.
@@ -27,8 +27,8 @@ A more detailed description of each step in the evolution process:
 5. Solution: The NEAT process continues to generate new solutions and assess them on the problem until a solution of sufficient quality is found. Once a satisfactory solution is found, the evolutionary process is stopped and the solution is returned[^PAUL].
 {{< figure src="./NEUROEV/POP_SPECIES.jpg" caption="Population diagram source Paul Pauls" numbered="true" >}}
 ### Genetic Encoding
-As stated as a key problem in Stanley's paper, a major challenge of NEAT is the genetic representation of the neural networks. It is important to ensure that dissimilar network toplogies can crossover in a meaningful way; new networks are given time to innovate and dont get removed from the population prematurely and finally, how to incorporate Occam's Razor into the problem without a contrived fitness function. These problems are solved in NEAT with the following solutions:
-- Utilise historical markings in the genetic encoding to identify topologies with the same origin,
+As stated as a key problem in Stanley's paper, a major challenge of NEAT is the genetic representation of the neural networks. It is important to ensure that dissimilar network toplogies can crossover in a meaningful way; new networks are given time to innovate (stopping them being removed from the population prematurely) and finally, how to incorporate Occam's Razor into the problem without a contrived fitness function. These problems are solved in NEAT with the following solutions:
+- Utilising historical markings in the genetic encoding to identify topologies with the same origin,
 - Separate newly innovated groups into new species,
 - Instantiate the network with a minimal structure and only grow when necessary.
 
@@ -83,11 +83,11 @@ In particular this article will discuss the fitness and novelty based approaches
 
 
 ## Learning to Walk
-The first experiment I attempted was with the  OPENAI Gym Bipedal Walker environment, the aim was to utilise the NEAT algorithm and learn walking behaviour within a 24 hour training window or completing the environment (whichever came first). The walker environment is deemed 'completed' if your model can complete 300 units of distance in 1600 time steps and the reward function gives an agent a reward for every unit of distance it travels and penalises an agent for the following:
+The first experiment I attempted was the  OPENAI Gym Bipedal Walker environment, the aim was to utilise the NEAT algorithm and learn walking behaviour within a 24 hour training window or by completing the environment (whichever came first). The walker environment is deemed 'completed' if the model can complete 300 units of distance in 1600 time steps and the reward function gives an agent a reward for every unit of distance it travels and penalises an agent for the following:
 - The use of any motor joints incurs a small energy cost,
 - The walker falling over incurs a -100 score penalty.
 
-Implicitly, this means the environment is telling us a 'good' model is one that travels lots of distance, with minimal energy expenditure and does not fall over. This is a good starting heuristic for 'walking' behaviour, but it will be discussed later why embedding more knowledge into the fitness function improves performance. This leads to my earliest implementation of the function that evaluates a genomes performance as follows:
+Implicitly, this means the environment is telling us a 'good' model is one that travels lots of distance, with minimal energy expenditure and does not fall over. This is a good starting heuristic for 'walking' behaviour, but as will be discussed later, embedding more knowledge into the fitness function improves performance. This leads to my earliest implementation of the function that evaluates a genomes performance as follows:
 ```python
 def eval_genome(genome, config):
     # setup the model and the environment
@@ -115,11 +115,11 @@ def eval_genome(genome, config):
     return statistics.mean(fitnesses)
 
 ```
-However, after running NEAT in this setup for various hyperparameter settings and a total of 40+ hours of training time, the model would get consistently stuck in a lunging behaviour that gained 6-8 units of distance and then stood still, as demonstrated in the clip below. This behaviour meant that because the walker did not fall over **another, more promising, model that travels less than 106 units but falls over is considered worse (once the -100 penalty for falling over is applied) despite have more promising emergent walking behaviour**. This problem meant the fitness function is not incentivising walking behaviour well and had to be adapted to avoid the local minima.
+However, after running NEAT in this setup for various hyperparameter settings and a total of 40+ hours of training time, the model would get consistently stuck in a lunging behaviour that gained 6-8 units of distance and then stood still, as demonstrated in the clip below. This behaviour meant that because the walker did not fall over **another, more promising, model that travels less than 106 units but falls over is considered worse (once the -100 penalty for falling over is applied) despite have more promising emergent walking behaviour**. This problem meant the fitness function is not incentivising walking behaviour well and had to be adapted to avoid this local minima.
 {{< video library="true" src="NEUROEV/step_and_stop.mp4" controls="yes" >}}
 
 ### Rolling Window Approach
-In order to fix the aforementioned problem with the fitness function and a long ignored problem with slow training times I decided to implement a further constraint on the model to address both these issues. These issues were solved by what I deemed the 'rolling window' approach. This approach gives the model a distance it must attain in a certain amount of time, penalising and ending the simulation run if the model does not attain these criterion. The process is outlined in Figure 5 below.
+In order to fix the aforementioned problem with the fitness function and a long ignored problem with slow training times I decided to implement a further constraint on the model to address both these issues. These issues were solved by what I called the 'rolling window' approach. This approach gives the model a distance it must attain in a certain amount of time, penalising and ending the simulation run if the model does not attain these criterion. The process is outlined in Figure 5 below.
 {{< figure src="./NEUROEV/dark_flow.drawio.png" caption="Flow Chart of Rolling Window Approach" numbered="true"  theme="dark">}}
 The rolling window approach improves the training process in the following ways:
 - The adaptation to the loss function terminates any model that doesnt make it through the next window thereby improving performance (this caused time per generation to go from 20s to 1.2s in my training).
@@ -171,13 +171,13 @@ def eval_genome(genome, config):
 
 ```
 ### Results
-After running the NEAT algorithm with the rolling window setup, convergent walking or 'shuffling' behaviour was achieved after 35000 generations and stagnated until 40000 generations. The training process and final model are displayed in the videos below. Although the model is now moving, albeit inefficiently, the greedy nature of the fitness function means we still have not completed the environment (the maximum distance attained was 154 units of distance). In order to motivate NEAT to generate more complex walking behaviour, that will not necessarily show dividends straight away, a new fitness function should be considered.
+After running the NEAT algorithm with the rolling window setup, convergent walking or 'shuffling' behaviour was achieved after 35000 generations and stagnated until 40000 generations. The training process and final model are displayed in the videos below. Although the model is now moving, albeit inefficiently, the greedy nature of the fitness function means the environment **was not completed** (the maximum distance attained was 154 units of distance). In order to motivate NEAT to generate more complex walking behaviour, that will not necessarily show dividends straight away, a new fitness function should be considered.
 {{< video library="true" src="NEUROEV/fit_Walker.mp4" controls="yes" >}}
 {{< video library="true" src="NEUROEV/fit-128-1600.mp4" controls="yes" >}}
 
 
 ## Novelty Search
-After listening to the TWiML podcast [^TWIML] with Kenneth Stanley (the co-author of the original NEAT paper) I discovered novelty search, a supposedly better parameterisation of the fitness function to generate complex behaviour. This new search algorithm is the basis of the second walker experiment. The idea of Novelty Search is to define fit model as a 'novel' model which means rewarding solutions that are sparse in the environment space; for example in a maze (the scenario the paper[^NOVELTY] uses) a 'novel' solution is one which reaches a new area of the maze rather than minimising something like the distance to the end (which dramatically increases the chance of getting stuck in a local minima).
+After listening to the TWiML podcast [^TWIML] with Kenneth Stanley (the co-author of the original NEAT paper) I discovered novelty search, a supposedly better parameterisation of the fitness function to generate complex behaviour. This new search algorithm is the basis of the second walker experiment. The idea of Novelty Search is to define a fit model as a 'novel' model, this means rewarding solutions that are sparse in the environment space. For example, in a maze (the scenario the paper[^NOVELTY] uses) a 'novel' solution is one which reaches a new area of the maze rather than minimising something like the distance to the end (which dramatically increases the chance of getting stuck in a local minima).
 {{< figure src="./NEUROEV/deception.png" caption="Example of Novelty Search outperforming euclidean distance for maze solving source: Lehman and Stanley" numbered="true" >}}
 In the example above from Lehman and Stanley's paper on Novelty Search[^NOVELTY] we see that novelty search dramatically outperforms a fitness based approach to maze solving. This setup is applied to the walker environment to see the performance of novelty search. The setup for the algorithm is as follows:
 - Novelty is defined as reaching a novel forward distance in the environment i.e the model has walked forwards to a spot no model has reached before,
@@ -241,7 +241,7 @@ def eval_genome(genome, config):
     return statistics.mean(fitnesses)
 ```
 ### Results
-After running NEAT on the new Novelty based fitness function a solution is found to the problem after just 4284 generations (shown in the video below). Although the computational cost is slightly higher than the previous rolling windows approach ($\\approx 5s\\,$ vs $\\approx 1s\\,$), Novelty search took almost 10 times less generations to converge to a solution that travels double the distance of the rolling window approach. **Thefore, Novelty Search dramatically outperformed the basic NEAT implementation** Below, it can be seen that the final model's behaviour is considerably more complex, utilising more motor joints meaning the algorithm has incentivised learning more complex but meaningful behaviour as desired.
+After running NEAT on the new Novelty based fitness function a solution is found to the problem after just 4284 generations (shown in the video below). Although the computational cost is slightly higher than the previous rolling windows approach ($\\approx 5s\\,$ vs $\\approx 1s\\,$), Novelty search took almost 10 times less generations to converge to a solution that travels double the distance of the rolling window approach. **Thefore, Novelty Search dramatically outperformed the basic NEAT implementation** Below, it can be seen that the final model's behaviour is considerably more complex, utilising more motor joints meaning the algorithm has incentivised learning more complex but meaningful behaviour as desired. Furthermore, in comparison to the distance based approach previously we can see a much more diverse set of optimal architectures being explored by the algorithm.
 {{< video library="true" src="NEUROEV/Walker.mp4" controls="yes" >}}
 {{< video library="true" src="NEUROEV/nov-236-1600.mp4" controls="yes" >}}
 
